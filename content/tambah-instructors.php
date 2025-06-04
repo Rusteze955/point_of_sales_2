@@ -9,6 +9,10 @@ if (isset($_GET['delete'])) {
     }
 }
 
+$id_user = isset($_GET['edit']) ? $_GET['edit'] : '';
+$queryEdit = mysqli_query($config, "SELECT * FROM instructors WHERE id = '$id_user'");
+$rowEdit = mysqli_fetch_assoc($queryEdit);
+
 if (isset($_POST['name'])) {
     // ada tidak parameter bernama edit, kalo ada jalankan perintah edit/update, kalo tidak ada tambah data baru/insert
     $name = $_POST['name'];
@@ -17,7 +21,6 @@ if (isset($_POST['name'])) {
     $phone = $_POST['phone'];
     $email = $_POST['email'];
     $address = $_POST['address'];
-    $id_user = isset($_GET['edit']) ? $_GET['edit'] : '';
 
     if (!isset($_GET['edit'])) {
         $insert = mysqli_query($config, "INSERT INTO instructors (name, gender, education, phone, email, address) VALUES('$name', '$gender', '$education', '$phone', '$email', '$address')");
@@ -33,12 +36,12 @@ if (isset($_POST['name'])) {
     <div class="col-sm-12">
         <div class="card">
             <div class="card-body">
-                <h5 class="card-title">Add Intructors</h5>
+                <h5 class="card-title"><?php echo isset($id_user) ? 'Edit' : 'Add' ?> Intructors</h5>
 
                 <form action="" method="post">
                     <div class="mb-3">
                         <label for="">Fullname</label>
-                        <input type="text" class="form-control" name="name" placeholder="Enter your name" required>
+                        <input type="text" class="form-control" name="name" placeholder="Enter your name" required value="<?php echo isset($rowEdit['name']) ? $rowEdit['name'] : ''; ?>">
                     </div>
                     <div class="form-check form-check-inline">
                         <input class="form-check-input" type="radio" name="gender" id="laki" value="1" required checked>
@@ -50,19 +53,19 @@ if (isset($_POST['name'])) {
                     </div>
                     <div class="mb-3">
                         <label for="">Education</label>
-                        <input type="text" class="form-control" name="education" placeholder="Enter education name" required>
+                        <input type="text" class="form-control" name="education" placeholder="Enter education name" required value="<?php echo isset($rowEdit['education']) ? $rowEdit['education'] : ''; ?>">
                     </div>
                     <div class="mb-3">
                         <label for="">Phone</label>
-                        <input type="text" class="form-control" name="phone" placeholder="Enter phone name" required>
+                        <input type="text" class="form-control" name="phone" placeholder="Enter phone name" required value="<?php echo isset($rowEdit['phone']) ? $rowEdit['phone'] : ''; ?>">
                     </div>
                     <div class="mb-3">
                         <label for="">Email</label>
-                        <input type="email" class="form-control" name="email" placeholder="Enter your email" required>
+                        <input type="email" class="form-control" name="email" placeholder="Enter your email" required value="<?php echo isset($rowEdit['email']) ? $rowEdit['email'] : ''; ?>">
                     </div>
                     <div class="mb-3">
                         <label for="">Address</label>
-                        <textarea name="address" id="" class="form-control"></textarea>
+                        <textarea name="address" id="" class="form-control" <?php echo isset($rowEdit['address']) ? $rowEdit['address'] : ''; ?>></textarea>
                     </div>
                     <div class="mb-3">
                         <input type="submit" class="btn btn-success" name="save" value="Save">

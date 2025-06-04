@@ -25,7 +25,7 @@
                     </a>
                 </li>
                 <li>
-                    <a href="components-badges.html">
+                    <a href="?page=roles">
                         <i class="bi bi-circle"></i><span>Roles</span>
                     </a>
                 </li>

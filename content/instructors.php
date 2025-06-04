@@ -37,6 +37,7 @@ $rows = mysqli_fetch_all($query, MYSQLI_ASSOC);
                                     <td><?php echo $row['email'] ?></td>
                                     <td><?php echo $row['address'] ?></td>
                                     <td>
+                                        <a href="?page=tambah-instructors-major&id=<?php echo $row['id'] ?>" class="btn btn-warning">Add Major</a>
                                         <a href="?page=tambah-instructors&edit=<?php echo $row['id'] ?>" class="btn btn-primary">Edit</a>
                                         <a onclick="return confirm('Are you sure wanna delete this data??')" href="?page=tambah-instructors&delete=<?php echo $row['id'] ?>" class="btn btn-danger">Delete</a>
                                     </td>
