@@ -1,0 +1,26 @@
+-sintaks membuat tabel dan menambahkan data:
+users = CREATE TABLE users (id INT AUTO_INCREMENT PRIMARY KEY, name VARCHAR(100))
+orders = CREATE TABLE orders (id INT AUTO_INCREMENT PRIMARY KEY, user_id INT, product_name VARCHAR(100), FOREIGN KEY (user_id) REFERENCES users(id))
+
+menambahkan data:
+user = INSERT INTO `users`(`name`) VALUES ('abdullah')
+orders = INSERT INTO `orders`(`user_id`, `product_name`) VALUES ('1','nasi goreng')
+
+a. menampilkan semua pengguna dan pesanan mereka
+SELECT users.name, orders.product_name
+FROM users
+INNER JOIN orders
+ON users.id = orders.user_id;
+
+b. menampilkan pengguna yang tidak memiliki pesanan
+SELECT users.name, orders.product_name
+FROM users
+LEFT JOIN orders
+ON users.id = orders.user_id;
+
+c. menampilkan pesanan yang tidak memiliki pengguna terdaftar
+SELECT users.name, orders.product_name
+FROM users
+RIGHT JOIN orders
+ON users.id = orders.user_id;
+
