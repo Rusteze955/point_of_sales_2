@@ -4,10 +4,10 @@ $id_role = isset($_SESSION['ID_ROLE']) ? $_SESSION['ID_ROLE'] : '';
 
 // 
 $rowStudent = mysqli_fetch_assoc(mysqli_query($config, "SELECT * FROM students WHERE id = '$id_user'"));
-$id_major = $rowStudent['id_major'];
-if ($id_role == 2) {
+$id_major = isset($rowStudent['id_major']) ? $rowStudent['id_major'] : '';
+if ($id_role == 6) {
     $where = "WHERE moduls.id_major='$id_major'";
-} elseif ($id_role == 1) {
+} elseif ($id_role == 4) {
     $where = "WHERE moduls.id_instructor='$id_user'";
 }
 $query = mysqli_query($config, "SELECT majors.name as majors_name, instructors.name as instructors_name, moduls.* FROM moduls LEFT JOIN majors ON majors.id = moduls.id_major LEFT JOIN instructors ON instructors.id = moduls.id_instructor $where ORDER BY moduls.id DESC");
@@ -20,7 +20,7 @@ $rows = mysqli_fetch_all($query, MYSQLI_ASSOC);
         <div class="card">
             <div class="card-body">
                 <h5 class="card-title">Data moduls</h5>
-                <?php if ($_SESSION['ID_ROLE'] == 1): ?>
+                <?php if (canAddModul(4)): ?>
                     <div class="mb-3" align="right">
                         <a href="?page=tambah-moduls" class="btn btn-primary">Add Moduls</a>
                     </div>
@@ -47,7 +47,10 @@ $rows = mysqli_fetch_all($query, MYSQLI_ASSOC);
                                     <td><?php echo $row['instructors_name'] ?></td>
                                     <td><?php echo $row['majors_name'] ?></td>
                                     <td>
-                                        <a onclick="return confirm('Are you sure wanna delete this data??')" href="?page=tambah-moduls&delete=<?php echo $row['id'] ?>" class="btn btn-danger">Delete</a>
+                                        <?php if ($id_role == 1): ?>
+                                            <a href="?page=tambah-moduls&edit=<?php echo $row['id'] ?>" class="btn btn-warning">Edit</a>
+                                            <a onclick="return confirm('Are you sure wanna delete this data??')" href="?page=tambah-moduls&delete=<?php echo $row['id'] ?>" class="btn btn-danger">Delete</a>
+                                        <?php endif ?>
                                     </td>
                                 </tr>
                             <?php endforeach ?>
