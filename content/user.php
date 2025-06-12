@@ -9,7 +9,7 @@ $rows = mysqli_fetch_all($query, MYSQLI_ASSOC);
         <div class="card">
             <div class="card-body">
                 <h5 class="card-title">Data User</h5>
-                <div class="mb-3" align="right">
+                <div class="mb-3 d-flex justify-content-between">
                     <a href="?page=tambah-user" class="btn btn-primary">Add User</a>
                     <a href="?page=restore-user" class="btn btn-primary">Restore User</a>
                 </div>

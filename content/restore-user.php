@@ -10,6 +10,14 @@ if (isset($_GET['restore'])) {
         header("location:?page=user");
     }
 }
+if (isset($_GET['delete'])) {
+    $idDel = $_GET['delete'];
+
+    $qDelete = mysqli_query($config, "DELETE FROM users WHERE id = $idDel");
+    if ($qDelete) {
+        header("location:?page=user ");
+    }
+}
 
 ?>
 
@@ -18,8 +26,8 @@ if (isset($_GET['restore'])) {
         <div class="card">
             <div class="card-body">
                 <h5 class="card-title">Data User</h5>
-                <div class="mb-3" align="right">
-                    <a href="?page=tambah-user" class="btn btn-primary">Add User</a>
+                <div class="mb-3 d-flex justify-content-between">
+                    <a href="?page=user" class="btn btn-secondary">Back</a>
                 </div>
                 <div class="table-responsive">
                     <table class="table table-bordered">
