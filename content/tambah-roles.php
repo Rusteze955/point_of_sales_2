@@ -93,14 +93,14 @@ if (isset($_POST['save'])) {
                             <button type="submit" class="btn btn-primary" name="save">Save Change</button>
                         </div>
                     </form>
-                <?php elseif (isset($_GET['edit'])): ?>
+                <?php else : ?>
                     <form action="" method="post">
                         <div class="mb-3">
                             <label for="">Role</label>
                             <input type="text" class="form-control" name="name" placeholder="Enter your role" required value="<?php echo isset($rowEdit['name']) ? $rowEdit['name'] : ''; ?>">
                         </div>
                         <div class="mb-3">
-                            <input type="submit" class="btn btn-success" name="save" value="Save">
+                            <input type="submit" class="btn btn-success" name="simpan" value="Save">
                         </div>
                     </form>
                 <?php endif ?>
