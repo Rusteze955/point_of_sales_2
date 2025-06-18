@@ -1,7 +1,7 @@
 <?php
 if (isset($_GET['delete'])) {
     $id_user = $_GET['delete'];
-    $queryDelete = mysqli_query($config, "DELETE FROM users WHERE id = '$id_user'");
+    $queryDelete = mysqli_query($config, "UPDATE users SET deleted_at = 1 WHERE id = '$id_user'");
     if ($queryDelete) {
         header("location:?page=user&hapus=berhasil");
     } else {
@@ -30,8 +30,6 @@ if (isset($_POST['name'])) {
 }
 
 $id_user = isset($_GET['add-user-role']) ? $_GET['add-user-role'] : '';
-$queryRoles = mysqli_query($config, "SELECT * FROM roles ORDER BY id DESC");
-$rowRoles = mysqli_fetch_all($queryRoles, MYSQLI_ASSOC);
 
 $queryUserRoles = mysqli_query($config, "SELECT user_roles.*, roles.name FROM user_roles LEFT JOIN roles ON user_roles.id_role = roles.id WHERE id_user='$id_user' ORDER BY user_roles.id DESC");
 $rowUserRoles = mysqli_fetch_all($queryUserRoles, MYSQLI_ASSOC);
@@ -41,6 +39,19 @@ if (isset($_POST['id_role'])) {
     $insert = mysqli_query($config, "INSERT INTO user_roles (id_role, id_user) VALUES('$id_role', '$id_user')");
     header("location:?page=tambah-user&add-user-role=" . $id_user . "add-user-role=berhasil");
 }
+
+$queryProduct = mysqli_query($config, "SELECT * FROM products ORDER BY id DESC");
+$rowProducts = mysqli_fetch_all($queryProduct, MYSQLI_ASSOC);
+
+$queryNoTrans = mysqli_query($config, "SELECT MAX(id) AS id_trans FROM transactions");
+$rowNoTrans = mysqli_fetch_assoc($queryNoTrans);
+$id_trans = $rowNoTrans['id_trans'];
+$id_trans++;
+
+$format_no = "TR";
+$date = date("dmy");
+$icrement_number = sprintf("%03s", $id_trans);
+$no_transaction = $format_no . "-" . $date . "-" . $icrement_number;
 
 ?>
 
@@ -87,21 +98,45 @@ if (isset($_POST['id_role'])) {
                 <?php else: ?>
 
                     <form action="" method="post">
-                        <div class="mb-3">
-                            <label for="">Fullname</label>
-                            <input type="text" class="form-control" name="name" placeholder="Enter your name" required value="<?php echo isset($rowEdit['name']) ? $rowEdit['name'] : ''; ?>">
+                        <div class="row">
+                            <div class="col-sm-4">
+                                <div class="mb-3">
+                                    <label for="">No Transaction *</label>
+                                    <input value="<?php echo $no_transaction ?>" type="text" class="form-control" readonly name="no_transaction">
+                                </div>
+                                <div class="mb-3">
+                                    <label for="">Product *</label>
+                                    <select name="" id="id_product" class="form-control">
+                                        <option value="">Select Product</option>
+                                        <?php foreach ($rowProducts as $rowProduct): ?>
+                                            <option value="<?php echo $rowProduct['id'] ?>"><?php echo $rowProduct['name'] ?></option>
+                                        <?php endforeach ?>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-sm-4">
+                                <div class="mb-3">
+                                    <label for="">Cashier *</label></label>
+                                    <input value="<?php echo $_SESSION['NAME'] ?>" type="text" class="form-control" name="no_transaction" readonly>
+                                    <input type="hidden" name="id_user" value="<?php echo $_SESSION['ID_USER'] ?>">
+                                </div>
+                            </div>
                         </div>
-                        <div class="mb-3">
-                            <label for="">Email</label>
-                            <input type="email" class="form-control" name="email" placeholder="Enter your email" required value="<?php echo isset($rowEdit['email']) ? $rowEdit['email'] : ''; ?>">
+                        <div align="right" class="mb-3">
+                            <button type="button" class="btn btn-primary addRow" id="addRow">Add Row</button>
                         </div>
-                        <div class="mb-3">
-                            <label for="">Password</label>
-                            <input type="password" class="form-control" name="password" placeholder="Enter your password" <?php echo empty($id_user) ? 'required' : '' ?>>
-                            <small>
-                                )* If you want to change the password, please enter the new password *
-                            </small>
-                        </div>
+                        <table class="table" id="myTable">
+                            <thead>
+                                <tr>
+                                    <th>No</th>
+                                    <th>Product</th>
+                                    <th>Qty</th>
+                                    <th>Total</th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
                         <div class="mb-3">
                             <input type="submit" class="btn btn-success" name="save" value="Save">
                         </div>
@@ -139,3 +174,48 @@ if (isset($_POST['id_role'])) {
         </div>
     </div>
 </div>
+<script>
+    // var, let, const
+    // var : ketika nilainya tidak ada, maka tidak ada error
+    // let : harus mempunyai nilai
+    // const :isi nya tidak boleh berubah
+    // const button = document.getElementById('addRow');
+    // const button = document.getElementsByClassName('addRow');
+    const button = document.querySelector('.addRow');
+    const tbody = document.querySelector('#myTable tbody');
+    // button.textContent = "duar";
+    // button.style.color = "red";
+
+    let no = 1;
+    button.addEventListener("click", function() {
+        // alert('Duar');
+        const tr = document.createElement('tr'); //<tr></tr>
+        tr.innerHTML = `
+        <td>${no}</td>
+        <td><input type='hidden' name='id_product[]'></td>
+        <td><input type='number' name='qty[]' value='0'></td>
+        <td><input type='hidden' name='total[]'></td>
+        <td><button class='btn btn-danger btn-sm removeRow' type='button'>Delete</button></td>`;
+
+        tbody.appendChild(tr);
+        no++;
+    });
+
+    tbody.addEventListener('click', function(e) {
+        if (e.target.classList.contains('removeRow')) {
+            e.target.closest("tr").remove();
+        }
+
+        updateNumber()
+
+    });
+
+    function updateNumber() {
+        const rows = tbody.querySelectorAll('tr');
+        rows.forEach(function(row, index) {
+            row.cells[0].textContent = index + 1;
+        });
+
+        no = rows.length + 1;
+    }
+</script>
