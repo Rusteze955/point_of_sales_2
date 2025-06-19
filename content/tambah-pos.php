@@ -53,6 +53,32 @@ $date = date("dmy");
 $icrement_number = sprintf("%03s", $id_trans);
 $no_transaction = $format_no . "-" . $date . "-" . $icrement_number;
 
+if (isset($_POST['save'])) {
+    $no_transaction = $_POST['no_transaction'];
+    $id_user = $_POST['id_user'];
+    $sub_total = $_POST['grand_total'];
+
+    $insertTrans = mysqli_query($config, "INSERT INTO transactions (no_transaction, id_user, sub_total) VALUES ('$no_transaction', '$id_user', '$sub_total')");
+
+
+    if ($insertTrans) {
+        $id_transaction = mysqli_insert_id($config);
+        $id_products = $_POST['id_product'];
+        $qtys = $_POST['qty'];
+        $totals = $_POST['total'];
+
+        foreach ($id_product as $key => $id_product) {
+            $id_product = $id_products[$key];
+            $qty = $qtys[$key];
+            $total = $totals[$key];
+
+            $insertTransDetail = mysqli_query($config, "INSERT INTO transaction_details (id_transaction, id_product, qty, total) VALUES('$id_transaction', '$id_product', '$qty', '$total')");
+        }
+        header("location:?page=pos");
+        exit();
+    }
+}
+
 ?>
 
 <div class="row">
@@ -102,14 +128,15 @@ $no_transaction = $format_no . "-" . $date . "-" . $icrement_number;
                             <div class="col-sm-4">
                                 <div class="mb-3">
                                     <label for="">No Transaction *</label>
-                                    <input value="<?php echo $no_transaction ?>" type="text" class="form-control" readonly name="no_transaction">
+                                    <input value="<?php echo $no_transaction ?>" type="text" class="form-control" readonly>
+                                    <input type="hidden" name="no_transaction" value="<?php echo $no_transaction ?>">
                                 </div>
                                 <div class="mb-3">
                                     <label for="">Product *</label>
-                                    <select name="" id="id_product" class="form-control">
+                                    <select name="id_product" id="id_product" class="form-control">
                                         <option value="">Select Product</option>
                                         <?php foreach ($rowProducts as $rowProduct): ?>
-                                            <option value="<?php echo $rowProduct['id'] ?>"><?php echo $rowProduct['name'] ?></option>
+                                            <option data-price="<?php echo $rowProduct['price'] ?>" value="<?php echo $rowProduct['id'] ?>"><?php echo $rowProduct['name'] ?></option>
                                         <?php endforeach ?>
                                     </select>
                                 </div>
@@ -117,7 +144,7 @@ $no_transaction = $format_no . "-" . $date . "-" . $icrement_number;
                             <div class="col-sm-4">
                                 <div class="mb-3">
                                     <label for="">Cashier *</label></label>
-                                    <input value="<?php echo $_SESSION['NAME'] ?>" type="text" class="form-control" name="no_transaction" readonly>
+                                    <input value="<?php echo $_SESSION['NAME'] ?>" type="text" class="form-control" readonly>
                                     <input type="hidden" name="id_user" value="<?php echo $_SESSION['ID_USER'] ?>">
                                 </div>
                             </div>
@@ -137,6 +164,9 @@ $no_transaction = $format_no . "-" . $date . "-" . $icrement_number;
                             </thead>
                             <tbody></tbody>
                         </table>
+                        <br>
+                        <p><strong>Grand Total: Rp. <span id="grandTotal">0</span></strong></p>
+                        <input type="hidden" name="grand_total" id="grandTotalInput" value="0">
                         <div class="mb-3">
                             <input type="submit" class="btn btn-success" name="save" value="Save">
                         </div>
@@ -181,24 +211,44 @@ $no_transaction = $format_no . "-" . $date . "-" . $icrement_number;
     // const :isi nya tidak boleh berubah
     // const button = document.getElementById('addRow');
     // const button = document.getElementsByClassName('addRow');
-    const button = document.querySelector('.addRow');
+    const button = document.querySelector('#addRow');
     const tbody = document.querySelector('#myTable tbody');
+    const select = document.querySelector('#id_product');
     // button.textContent = "duar";
     // button.style.color = "red";
+    const grandTotal = document.getElementById('grandTotal');
+    const grandTotalInput = document.getElementById('grandTotalInput');
 
     let no = 1;
     button.addEventListener("click", function() {
-        // alert('Duar');
+
+        const selectedProduct = select.options[select.selectedIndex];
+        const productValue = selectedProduct.value;
+        if (!productValue) {
+            alert('select product require');
+            return;
+        }
+        const productName = selectedProduct.textContent;
+        const productPrice = selectedProduct.dataset.price;
+
         const tr = document.createElement('tr'); //<tr></tr>
         tr.innerHTML = `
         <td>${no}</td>
-        <td><input type='hidden' name='id_product[]'></td>
-        <td><input type='number' name='qty[]' value='0'></td>
-        <td><input type='hidden' name='total[]'></td>
+        <td><input type='hidden' name='id_product[]' class='id_products' value='${select.value}'>${productName}</td>
+        <td>
+            <input type='number' name='qty[]' value='1' class='qtys'>
+            <input type='hidden' class='priceInput' name='price[]' value='${productPrice}'>
+        </td>
+        <td><input type='hidden' name='total[]' class='totals' value='${productPrice}'><span class='totalText'>${productPrice}</span></td>
         <td><button class='btn btn-danger btn-sm removeRow' type='button'>Delete</button></td>`;
 
         tbody.appendChild(tr);
+        updateGrandTotal();
         no++;
+
+        select.value = "";
+
+
     });
 
     tbody.addEventListener('click', function(e) {
@@ -206,8 +256,22 @@ $no_transaction = $format_no . "-" . $date . "-" . $icrement_number;
             e.target.closest("tr").remove();
         }
 
-        updateNumber()
+        updateNumber();
+        updateGrandTotal();
 
+    });
+
+    tbody.addEventListener('input', function(e) {
+        if (e.target.classList.contains('qtys')) {
+            const row = e.target.closest('tr');
+            const qty = parseInt(e.target.value) || 0;
+            const price = parseInt(row.querySelector('[name="price[]"]').value);
+
+            row.querySelector('.totalText').textContent = price * qty;
+            row.querySelector('.totals').value = price * qty;
+            updateGrandTotal();
+
+        }
     });
 
     function updateNumber() {
@@ -217,5 +281,15 @@ $no_transaction = $format_no . "-" . $date . "-" . $icrement_number;
         });
 
         no = rows.length + 1;
+    }
+
+    function updateGrandTotal() {
+        const totalCells = tbody.querySelectorAll('.totals');
+        let grand = 0;
+        totalCells.forEach(function(input) {
+            grand += parseInt(input.value) || 0;
+        });
+        grandTotal.textContent = grand.toLocaleString('id-ID');
+        grandTotalInput.value = grand;
     }
 </script>

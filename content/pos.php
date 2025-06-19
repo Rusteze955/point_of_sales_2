@@ -2,6 +2,16 @@
 $query = mysqli_query($config, "SELECT users.name, transactions.* FROM transactions LEFT JOIN users ON users.id = transactions.id_user ORDER BY id DESC");
 // 12345, 54321
 $rows = mysqli_fetch_all($query, MYSQLI_ASSOC);
+
+if (isset($_GET['delete'])) {
+    $id = $_GET['delete'];
+    $query = mysqli_query($config, "DELETE FROM transactions WHERE id = '$id'");
+    if ($query) {
+        header("location:?page=pos");
+        exit();
+    }
+}
+
 ?>
 
 <div class="row">
@@ -17,7 +27,7 @@ $rows = mysqli_fetch_all($query, MYSQLI_ASSOC);
                         <thead>
                             <tr>
                                 <th>No</th>
-                                <th>No Transactiom</th>
+                                <th>No Transaction</th>
                                 <th>Cashier Name</th>
                                 <th>Sub Total</th>
                                 <th></th>
@@ -29,10 +39,10 @@ $rows = mysqli_fetch_all($query, MYSQLI_ASSOC);
                                     <td><?php echo $index += 1; ?></td>
                                     <td><?php echo $row['no_transaction'] ?></td>
                                     <td><?php echo $row['name'] ?></td>
-                                    <td><?php echo "Rp" . $row['subtotal'] ?></td>
+                                    <td><?php echo "Rp" . $row['sub_total'] ?></td>
                                     <td>
-                                        <a href="?page=tambah-pos&edit=<?php echo $row['id'] ?>" class="btn btn-warning">Print</a>
-                                        <a onclick="return confirm('Are you sure wanna delete this data??')" href="?page=tambah-user&delete=<?php echo $row['id'] ?>" class="btn btn-danger">Delete</a>
+                                        <a href="?page=print-pos&edit=<?php echo $row['id'] ?>" class="btn btn-warning">Print</a>
+                                        <a onclick="return confirm('Are you sure wanna delete this data??')" href="?page=pos&delete=<?php echo $row['id'] ?>" class="btn btn-danger">Delete</a>
                                     </td>
                                 </tr>
                             <?php endforeach ?>
